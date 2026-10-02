@@ -1,0 +1,4 @@
+# Large binary model weights -- must go through Git LFS, not a plain blob (GitHub hard-rejects
+# any single file over 100 MB, and the .keras file here is ~109 MB).
+models/classifier/*.keras filter=lfs diff=lfs merge=lfs -text
+models/segformer/*.pth filter=lfs diff=lfs merge=lfs -text

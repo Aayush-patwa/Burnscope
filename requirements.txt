@@ -1,0 +1,50 @@
+# BurnScope runtime dependencies.
+# Versions are the ones this project was tested with (Python 3.13.2); relax them if your platform needs different builds.
+#
+# CPU-only PyTorch wheels (deployment): cloud free tiers (Hugging Face Spaces, Streamlit
+# Community Cloud) are CPU-only boxes. Without this index, pip resolves the default CUDA-bundled
+# torch wheels (several GB, useless on a CPU box) and can blow past build-size/time limits.
+# Harmless locally too -- if you have a CUDA GPU and want GPU torch, delete these two lines and
+# the "+cpu" suffixes below, or follow https://pytorch.org/get-started/locally/ instead.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# LLM agent (Groq), config, HTTP (OpenStreetMap clinic lookup)
+groq==1.7.0
+python-dotenv==1.2.2
+requests==2.32.5
+
+# Gemini (clinic-facility classification only -- tools/clinic_locator.py)
+google-genai==2.20.0
+
+# Burn severity classifier (EfficientNetV2-S .keras) and Grad-CAM. Keras 3 ships with TensorFlow.
+tensorflow==2.21.0
+numpy==2.3.1
+pillow==11.3.0
+# opencv-python-headless, not opencv-python: headless cloud containers lack libGL.so.1, which
+# plain opencv-python needs just to import. We never open a GUI window, so headless is identical
+# for us and avoids the single most common Streamlit-Cloud/HF-Spaces crash-on-import.
+opencv-python-headless==4.13.0.92
+
+# Wound segmentation (SegFormer-B1)
+torch==2.14.0+cpu
+torchvision==0.29.0+cpu
+transformers==5.3.0
+scipy==1.17.0
+
+# RAG: ChromaDB vector store, local sentence-transformers embeddings (used by ChromaDB), .docx source parser
+chromadb==1.5.9
+sentence-transformers==5.2.3
+python-docx==1.2.0
+
+# User/case store on Postgres (Neon) when DATABASE_URL is set; SQLite otherwise
+psycopg[binary]==3.3.6
+
+# Escalation report PDF
+reportlab==5.0.1
+
+# Web app (run: python -m streamlit run app.py)
+streamlit==1.58.0
+
+# Tests (run: pytest)
+pytest==9.1.1
+pypdf

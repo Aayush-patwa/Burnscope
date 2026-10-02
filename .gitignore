@@ -1,0 +1,84 @@
+# ============================================================================
+# BurnScope .gitignore
+# This repository is public. Nothing personal, secret or third-party-licensed
+# should be committed -- the rules below are what keeps it that way.
+# ============================================================================
+
+# ---------------------------------------------------------------- secrets
+# Contains GROQ_API_KEY, GEMINI_API_KEY, HF_TOKEN, DATABASE_URL, EMAIL_ADDRESS,
+# EMAIL_APP_PASSWORD (a Gmail app password). NEVER commit this file. Commit
+# .env.example instead (see README "Configuration").
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------- Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+
+# Virtual environments (name varies by how each person creates theirs)
+.venv/
+venv/
+env/
+ENV/
+
+# ---------------------------------------------------------------- runtime data (regenerated, or per-user)
+# The local case database: real user data. Never commit it.
+data/cases.db
+data/cases.db-journal
+data/cases.db-wal
+data/cases.db-shm
+
+# Per-user uploaded photos and per-user generated files (Grad-CAM overlays,
+# PDF reports). May contain real photos and reports of real people.
+data/users/
+outputs/
+
+# ---------------------------------------------------------------- NOT part of the public repository
+# Demo photos: they come from third-party sources (some show identifiable
+# people), so they are kept out. Put your own JPGs in data/sample_images/ to
+# get the in-app "sample photo" picker and the tests that use them.
+data/sample_images/*
+!data/sample_images/README.md
+
+# Guidance documents (the RAG corpus): adapted from WHO, national guidelines
+# and patient-information leaflets, each under its own licence, so they are
+# not redistributed here. See rag/source_docs/README.md for what to supply.
+rag/source_docs/*
+!rag/source_docs/README.md
+
+# The search index built from those documents (rebuilt automatically on the
+# first start, or with: python -m rag.build_index).
+rag/vector_store/
+
+# ---------------------------------------------------------------- Streamlit
+.streamlit/secrets.toml
+
+# ---------------------------------------------------------------- local notes and tool state
+CLAUDE.md
+.claude/
+
+# ---------------------------------------------------------------- OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/
+*.sublime-workspace
+
+# ============================================================================
+# Deliberately NOT ignored:
+#   models/classifier/*.keras, models/segformer/*.pth  (~162 MB combined, stored
+#     with Git LFS -- see .gitattributes and README "Model weights")
+#   docs/sample_report.pdf                              (an example generated report)
+# ============================================================================
