@@ -25,7 +25,7 @@ on the model behaving.
 | Severity classifier, external dataset | **75.25%** accuracy, 75.48% macro F1 | 408 images from an independent source, never used for training; the better guide to real-world performance |
 | Reliability gate on the external set (confidence 0.90) | accepts 58.1% of images at **86.9%** accuracy; withholds 70 of 101 errors | 31 errors still pass the gate; calibration on new data is poor (ECE 0.127) |
 | Wound segmentation (SegFormer-B1) | Dice **0.8479**, IoU **0.7530** | 204 held-out test images, split by source photo |
-| Automated tests | 154 | scripted language model, real tools; no network needed |
+| Automated tests | 158 | scripted language model, real tools; no network needed |
 
 The drop from 91% to 75% on unfamiliar images is a real limitation, not noise. See [Known limitations](#known-limitations).
 
@@ -134,6 +134,7 @@ There is also a plain terminal session: `python -m agent.loop`.
 |---|---|---|
 | `GROQ_API_KEY` | **Yes** | The agent's language-model calls |
 | `DATABASE_URL` | No | Postgres (e.g. a Neon pooled URL). When set, users, cases and sign-in sessions live there instead of local SQLite, so they survive restarts on hosts with a temporary disk |
+| `GUIDANCE_REPO`, `GUIDANCE_TOKEN` | No | Fetch the guidance documents at start-up from a **private** GitHub repo (`owner/name` plus a read-only token), so a deployment can use them without publishing them |
 | `GEMINI_API_KEY` | No | Clinic-facility filtering only; unfiltered results if unset |
 | `EMAIL_ADDRESS`, `EMAIL_APP_PASSWORD` | No | Reminder and report e-mails (a Gmail App Password); silently disabled if unset |
 | `HF_TOKEN` | No | Only if downloading the public SegFormer base model hits a rate limit |
@@ -142,7 +143,7 @@ There is also a plain terminal session: `python -m agent.loop`.
 ### Tests
 
 ```bash
-pytest          # 154 tests, scripted language model, no Groq calls
+pytest          # 158 tests, scripted language model, no Groq calls
 ```
 
 `python tests/live_e2e.py` is a separate end-to-end script that uses real Groq calls (it costs quota) and is not

@@ -47,6 +47,8 @@ def ensure_index():
     """Build the index only if it is missing or empty. The app calls this at start-up, so a fresh checkout works
     without a manual build step (the generated index is not kept in git)."""
     if not index_ready():
+        from rag.corpus import fetch_corpus_if_configured
+        fetch_corpus_if_configured()              # a deployment may keep the documents in a private repo
         print("  [build_index] No search index found - building it from rag/source_docs/ ...")
         build()
 
