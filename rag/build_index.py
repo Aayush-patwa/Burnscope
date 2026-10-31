@@ -18,7 +18,6 @@ SOURCE_DOCS = [
 
 SOURCE_DIR = os.path.join(os.path.dirname(__file__), "source_docs")
 
-
 def build():
     all_chunks = []
     for fname in SOURCE_DOCS:

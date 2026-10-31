@@ -405,6 +405,13 @@ def _build_pdf(
             rows.append([_p(_esc(c.get("name", "-")), "CellBold"), _p(_esc(c.get("address", "-"))),
                          _p(f"{d} km" if d is not None else "-")])
         story.append(_table(rows, [width * 0.36, width * 0.46, width * 0.18]))
+        if any(c.get("provider") == "geoapify" for c in clinics):
+            origin = next((c.get("origin_name") for c in clinics if c.get("origin_name")), None)
+            if origin:
+                story.append(_p("Straight-line distances from: " + _esc(origin), "Caption"))
+            story.append(_p('Powered by <link href="https://www.geoapify.com/">Geoapify</link>; '
+                            'data: <link href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</link> (ODbL). '
+                            'Facility services and availability have not been verified.', "Caption"))
 
     # --- 10. Follow-up plan ---
     if inc("followup"):

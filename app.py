@@ -451,6 +451,13 @@ def chat_panel(sess, snap):
             with st.spinner("Thinking. Replies can take up to a minute on the free AI tier..."):
                 sess.send(prompt)
         st.rerun()
+    if any(c.get("provider") == "geoapify" for c in snap.get("clinics", [])):
+        origin = next((c.get("origin_name") for c in snap["clinics"] if c.get("origin_name")), None)
+        if origin:
+            st.caption(f"Clinic distances are straight-line estimates from: {origin}")
+        st.markdown("Powered by [Geoapify](https://www.geoapify.com/) · "
+                    "Data: [OpenStreetMap contributors](https://www.openstreetmap.org/copyright). "
+                    "Facility services and availability have not been verified.")
     sources = []
     for p in snap["guidance"]:
         for src in [x.strip() for x in p["source"].replace(" (table)", "").split(";") if x.strip()]:

@@ -22,7 +22,7 @@ from rag.vector_store import query as vector_query
 from agent.medication_filter import redact_drug_terms
 
 
-# Chroma L2 distances measured on this corpus (all-mpnet-base-v2): burn questions
+# 
 # land at 0.14-0.55, unrelated questions (sport, cars, recipes) at 0.80 and above.
 # Anything past the floor is treated as "the knowledge base has nothing on this".
 MAX_DISTANCE = 0.65

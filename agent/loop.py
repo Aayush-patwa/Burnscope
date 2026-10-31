@@ -373,6 +373,23 @@ def run_agent_turn(history: list, case_id: str, case_state: dict) -> dict:
     return {"history": history, "final_answer": final_answer, "error": error, "guard": guard}
 
 
+def _clinic_lookup_failure_reply(result: dict) -> str:
+    """A failed lookup must not become a list invented by the language model."""
+    status = result.get("status")
+    if status == "location_not_found":
+        return ("I couldn't match that place. Please include the neighbourhood, city and country, "
+                "or a postal code. I don't have verified facilities or distances to list yet.")
+    if status == "no_results":
+        return ("The map search completed, but it returned no named matching hospitals or clinics. "
+                "This does not mean none exist. Please try a nearby landmark or another location. "
+                "I don't have verified facilities or distances to list.")
+    if result.get("failed_stage") == "input":
+        return "Please provide a city, neighbourhood or postal code so I can search for nearby facilities."
+    stage = "place lookup" if result.get("failed_stage") == "geocoding" else "nearby-facility search"
+    return (f"The {stage} service is unavailable right now, so I couldn't verify nearby facilities "
+            "or their distances. Please try again shortly. I don't have verified clinic results to list.")
+
+
 def _agent_turn_loop(history: list, case_id: str, case_state: dict):
     """The tool-calling loop for one turn. Returns (final_answer, error_kind, guard)."""
     retrieved_this_turn = False
@@ -411,6 +428,7 @@ def _agent_turn_loop(history: list, case_id: str, case_state: dict):
                 ],
             })
 
+            clinic_lookup_result = None
             for call in message.tool_calls:
                 tool_name = call.function.name
                 try:
@@ -495,6 +513,11 @@ def _agent_turn_loop(history: list, case_id: str, case_state: dict):
                 result = blocked if blocked is not None else execute_tool(tool_name, tool_args)
                 print(f"  [tool result] {result}")
 
+                if tool_name == "locate_nearby_clinics":
+                    clinic_lookup_result = result
+                    # Also clear stale clinic data when dispatch itself reports an error.
+                    case_state["clinics_result"] = result if isinstance(result, dict) else {"clinics": []}
+
                 # Track every SUCCESSFUL result as it comes in, so later
                 # tool calls (especially generate_escalation_report) can be
                 # backfilled from real, already-gathered case data. A failed
@@ -559,6 +582,14 @@ def _agent_turn_loop(history: list, case_id: str, case_state: dict):
             except Exception as e:
                 print(f"  [case_store] WARNING: could not save results for {case_id}: "
                       f"{type(e).__name__}: {e}")
+
+            if clinic_lookup_result is not None and not clinic_lookup_result.get("clinics"):
+                # Do not give the model another chance to invent a fallback hospital list.
+                # Tool-call/result messages are already paired and any other completed
+                # calls in this batch have been persisted before this early response.
+                final_text = _clinic_lookup_failure_reply(clinic_lookup_result)
+                history.append({"role": "assistant", "content": final_text})
+                return final_text, None, "clinic_lookup_unavailable"
 
             continue  # loop again so the LLM can see the tool results
 
